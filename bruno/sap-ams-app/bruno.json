@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "sap-ams-app",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

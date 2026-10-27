@@ -1,0 +1,36 @@
+meta {
+  name: new article
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{BASE_URL}}/api/articles
+  body: json
+  auth: bearer
+}
+
+headers {
+  authorization: BEARER {{TOKEN}}
+}
+
+auth:bearer {
+  token: 05ccff45019f2a5a6aab548bc8ec3bb7a65c89cf315ecc933f27d86d1845db4032ab66a5607047e0015029b6e4cbb4d8a6c565315b33507c90f21bf7397c43e6
+}
+
+body:json {
+  {
+      "title": "ME21N Purchase Order Error",
+      "summary": "Purchase order creation issue.",
+      "content": "Check vendor, material, and purchasing organization configuration.",
+      "module": "MM",
+      "severity": "high",
+      "status": "published",
+      "tags": ["ME21N", "PO", "MM"]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

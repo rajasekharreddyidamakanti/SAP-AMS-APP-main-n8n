@@ -1,0 +1,16 @@
+meta {
+  name: attachment files 
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{BASE_URL}}/api/articles/{article_id}/attachments
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}
+​

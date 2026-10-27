@@ -1,0 +1,15 @@
+meta {
+  name: delete attachment
+  type: http
+  seq: 1
+}
+
+delete {
+  url: {{BASE_URL}}/api/articles/attachments/2
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

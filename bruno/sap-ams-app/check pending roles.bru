@@ -1,0 +1,19 @@
+meta {
+  name: check pending roles
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{BASE_URL}}/api/roles/pending
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: 05ccff45019f2a5a6aab548bc8ec3bb7a65c89cf315ecc933f27d86d1845db4032ab66a5607047e0015029b6e4cbb4d8a6c565315b33507c90f21bf7397c43e6
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
