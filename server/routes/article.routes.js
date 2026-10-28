@@ -3,6 +3,7 @@ const router = express.Router();
 
 const articleController = require("../controllers/article.controller");
 const authMiddleware = require("../middleware/auth.middleware");
+const requireAdmin = require("../middleware/admin.middleware");
 const validate = require("../middleware/validate.middleware");
 
 
@@ -29,16 +30,19 @@ router.get(
 router.get(
     "/pending",
     authMiddleware,
+    requireAdmin,
     articleController.getPendingArticles
 );
 
 router.get(
     "/search",
+    authMiddleware,
     articleController.searchArticles
 );
 
 router.get(
     "/:id",
+    authMiddleware,
     articleController.getArticleById
 );
 

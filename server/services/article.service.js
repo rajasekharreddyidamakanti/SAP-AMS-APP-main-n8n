@@ -55,10 +55,10 @@ class ArticleService {
 
     }
 
-    async getArticleById(id) {
+    async getArticleById(id, userId) {
 
         const article =
-            await articleRepository.getArticleById(id);
+            await articleRepository.getArticleForUser(id, userId);
 
         if (!article) {
 
@@ -327,16 +327,38 @@ class ArticleService {
 
     }
 
-    async getArticleExperts(articleId) {
+    async getArticleExperts(articleId, userId) {
+        await this.getArticleById(articleId, userId);
         return await articleRepository.getArticleExperts(articleId);
     }
 
-    async deleteArticle(id) {
-
-        const article =
-            await articleRepository.deleteArticle(id);
+    async deleteArticle(id, user) {
+        const article = await articleRepository.getArticleOwner(id);
 
         if (!article) {
+            throw {
+                status: 404,
+                message: "Article not found"
+            };
+        }
+
+        const isOwner = article.created_by === user.userId;
+        const databaseRoles = await articleRepository.getAuthorRoles(user.userId);
+        const isAdmin = databaseRoles.some(
+            (role) => String(role).toLowerCase() === "admin"
+        );
+
+        if (!isOwner && !isAdmin) {
+            throw {
+                status: 403,
+                message: "You are not allowed to delete this article."
+            };
+        }
+
+        const deletedArticle =
+            await articleRepository.deleteArticle(id);
+
+        if (!deletedArticle) {
 
             throw {
                 status: 404,
@@ -345,11 +367,32 @@ class ArticleService {
 
         }
 
-        return article;
+        return deletedArticle;
 
     }
 
-    async getEditHistory(articleId) {
+    async getEditHistory(articleId, user) {
+        const article = await articleRepository.getArticleOwner(articleId);
+
+        if (!article) {
+            throw {
+                status: 404,
+                message: "Article not found"
+            };
+        }
+
+        const isOwner = article.created_by === user.userId;
+        const databaseRoles = await articleRepository.getAuthorRoles(user.userId);
+        const isAdmin = databaseRoles.some(
+            (role) => String(role).toLowerCase() === "admin"
+        );
+
+        if (!isOwner && !isAdmin) {
+            throw {
+                status: 403,
+                message: "You are not allowed to view this article's edit history."
+            };
+        }
 
         return await articleRepository.getEditHistory(
             articleId

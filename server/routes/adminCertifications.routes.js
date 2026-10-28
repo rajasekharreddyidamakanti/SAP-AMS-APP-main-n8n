@@ -16,6 +16,7 @@
 const express  = require("express");
 const router   = express.Router();
 const auth     = require("../middleware/auth.middleware");
+const requireAdmin = require("../middleware/admin.middleware");
 const pool     = require("../config/db");
 const multer   = require("multer");
 const path     = require("path");
@@ -59,7 +60,7 @@ router.get("/", auth, async (req, res) => {
 
 // ── POST /api/admin-certifications ────────────────────────────────────────
 // Admin creates a certification
-router.post("/", auth, async (req, res) => {
+router.post("/", auth, requireAdmin, async (req, res) => {
     try {
         const { name, content, link, departments, due_date } = req.body;
         const { rows } = await pool.query(
@@ -93,7 +94,7 @@ router.get("/my-submissions", auth, async (req, res) => {
 
 // ── GET /api/admin-certifications/all-submissions ────────────────────────
 // Admin: all user submissions
-router.get("/all-submissions", auth, async (req, res) => {
+router.get("/all-submissions", auth, requireAdmin, async (req, res) => {
     try {
         const { rows } = await pool.query(
             `SELECT uc.*, ac.name AS cert_name, u.name AS user_name, u.email AS user_email
@@ -110,7 +111,7 @@ router.get("/all-submissions", auth, async (req, res) => {
 
 // ── GET /api/admin-certifications/:id/department-submissions ─────────────
 // Admin: all users from the cert's department(s), with their submission status
-router.get("/:id/department-submissions", auth, async (req, res) => {
+router.get("/:id/department-submissions", auth, requireAdmin, async (req, res) => {
     try {
         const certId = req.params.id;
         // Get the cert to know target departments
@@ -207,7 +208,7 @@ router.post("/submit", auth, upload.single("file"), async (req, res) => {
 
 // ── PUT /api/admin-certifications/submission/:id/approve ─────────────────
 // Admin approves a submission
-router.put("/submission/:id/approve", auth, async (req, res) => {
+router.put("/submission/:id/approve", auth, requireAdmin, async (req, res) => {
     try {
         await pool.query(
             `UPDATE user_certifications SET status='approved' WHERE id=$1`,
@@ -221,7 +222,7 @@ router.put("/submission/:id/approve", auth, async (req, res) => {
 
 // ── PUT /api/admin-certifications/submission/:id/reject ──────────────────
 // Admin rejects a submission
-router.put("/submission/:id/reject", auth, async (req, res) => {
+router.put("/submission/:id/reject", auth, requireAdmin, async (req, res) => {
     try {
         await pool.query(
             `UPDATE user_certifications SET status='rejected' WHERE id=$1`,
@@ -233,11 +234,9 @@ router.put("/submission/:id/reject", auth, async (req, res) => {
     }
 });
 
-module.exports = router;
-
 // ── DELETE /api/admin-certifications/submission/:id ──────────────────────
 // Admin deletes a submission entirely (and its uploaded file, if any)
-router.delete("/submission/:id", auth, async (req, res) => {
+router.delete("/submission/:id", auth, requireAdmin, async (req, res) => {
     try {
         const { rows } = await pool.query(
             `DELETE FROM user_certifications WHERE id=$1 RETURNING *`,
@@ -259,3 +258,5 @@ router.delete("/submission/:id", auth, async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 });
+
+module.exports = router;

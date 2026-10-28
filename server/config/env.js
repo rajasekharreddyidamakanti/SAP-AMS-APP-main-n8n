@@ -2,12 +2,9 @@ const fs = require("fs");
 const path = require("path");
 
 const envPath = path.resolve(__dirname, "..", ".env");
-const exampleEnvPath = path.resolve(__dirname, "..", ".env.example");
 
 if (fs.existsSync(envPath)) {
     require("dotenv").config({ path: envPath });
-} else if (fs.existsSync(exampleEnvPath)) {
-    require("dotenv").config({ path: exampleEnvPath });
 }
 
 const dbPassword = process.env.DB_PASSWORD;

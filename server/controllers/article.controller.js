@@ -62,7 +62,8 @@ const getArticleById = async (req, res) => {
 
         const article =
             await articleService.getArticleById(
-                req.params.id
+                req.params.id,
+                req.user.userId
             );
 
         res.json(article);
@@ -185,10 +186,13 @@ const searchArticles = async (req, res) => {
 
 const getArticleExperts = async (req, res) => {
     try {
-        const experts = await articleService.getArticleExperts(req.params.id);
+        const experts = await articleService.getArticleExperts(
+            req.params.id,
+            req.user.userId
+        );
         res.json({ success: true, data: experts });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(error.status || 500).json({ message: error.message });
     }
 };
 
@@ -196,7 +200,8 @@ const deleteArticle = async (req, res) => {
     try {
 
         await articleService.deleteArticle(
-            req.params.id
+            req.params.id,
+            req.user
         );
 
         res.json({
@@ -218,7 +223,8 @@ const getEditHistory = async(req,res)=>{
 
         const history =
             await articleService.getEditHistory(
-                req.params.id
+                req.params.id,
+                req.user
             );
 
         res.json(history);
@@ -226,7 +232,7 @@ const getEditHistory = async(req,res)=>{
     }
     catch(error){
 
-        res.status(500).json({
+        res.status(error.status || 500).json({
             message:error.message
         });
 

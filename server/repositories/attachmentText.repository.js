@@ -129,9 +129,12 @@ class AttachmentTextRepository {
 
     async readPptx(filePath){
 
-        return await officeParser.parseOfficeAsync(
+        const document = await officeParser.parseOffice(
             filePath
         );
+        const text = await document.to("text");
+
+        return text.value;
 
     }
 

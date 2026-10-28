@@ -76,24 +76,24 @@ class ArticleRepository {
             AND ur.user_id = $1
 
             WHERE
-
-            (
-                ka.visibility='public'
-            )
-
-            OR
-
-            (
-                ka.visibility='private'
-                AND ka.created_by=$1
-            )
-
-            OR
-
-            (
-                ka.visibility='restricted'
-                AND ur.user_id IS NOT NULL
-            )
+                ka.created_by = $1
+                OR EXISTS (
+                    SELECT 1
+                    FROM user_roles admin_ur
+                    JOIN roles admin_r ON admin_r.role_id = admin_ur.role_id
+                    WHERE admin_ur.user_id = $1
+                      AND LOWER(admin_r.role_name) = 'admin'
+                )
+                OR (
+                    ka.status = 'published'
+                    AND (
+                        ka.visibility = 'public'
+                        OR (
+                            ka.visibility = 'restricted'
+                            AND ur.user_id IS NOT NULL
+                        )
+                    )
+                )
 
             ORDER BY ka.created_at DESC
             `,
@@ -109,9 +109,48 @@ class ArticleRepository {
             `
             SELECT *
             FROM knowledge_articles
-            WHERE article_id=$1
+            WHERE article_id = $1
             `,
             [id]
+        );
+
+        return result.rows[0];
+    }
+
+    async getArticleForUser(id, userId) {
+
+        const result = await pool.query(
+            `
+            SELECT DISTINCT ka.*
+            FROM knowledge_articles ka
+            LEFT JOIN article_visibility_roles avr
+              ON ka.article_id = avr.article_id
+            LEFT JOIN user_roles ur
+              ON avr.role_id = ur.role_id
+             AND ur.user_id = $2
+            WHERE ka.article_id = $1
+              AND (
+                ka.created_by = $2
+                OR EXISTS (
+                    SELECT 1
+                    FROM user_roles admin_ur
+                    JOIN roles admin_r ON admin_r.role_id = admin_ur.role_id
+                    WHERE admin_ur.user_id = $2
+                      AND LOWER(admin_r.role_name) = 'admin'
+                )
+                OR (
+                    ka.status = 'published'
+                    AND (
+                        ka.visibility = 'public'
+                        OR (
+                            ka.visibility = 'restricted'
+                            AND ur.user_id IS NOT NULL
+                        )
+                    )
+                )
+              )
+            `,
+            [id, userId]
         );
 
         return result.rows[0];
@@ -334,26 +373,25 @@ class ArticleRepository {
 
             )
 
-            AND
-
-            (
-
-                ka.visibility='public'
-
-                OR
-
-                (
-                    ka.visibility='private'
-                    AND ka.created_by=$2
+            AND (
+                ka.created_by = $2
+                OR EXISTS (
+                    SELECT 1
+                    FROM user_roles admin_ur
+                    JOIN roles admin_r ON admin_r.role_id = admin_ur.role_id
+                    WHERE admin_ur.user_id = $2
+                      AND LOWER(admin_r.role_name) = 'admin'
                 )
-
-                OR
-
-                (
-                    ka.visibility='restricted'
-                    AND ur.user_id IS NOT NULL
+                OR (
+                    ka.status = 'published'
+                    AND (
+                        ka.visibility = 'public'
+                        OR (
+                            ka.visibility = 'restricted'
+                            AND ur.user_id IS NOT NULL
+                        )
+                    )
                 )
-
             )
 
             `,
