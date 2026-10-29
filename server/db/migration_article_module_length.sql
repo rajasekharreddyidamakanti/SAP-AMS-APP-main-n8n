@@ -1,0 +1,6 @@
+BEGIN;
+
+ALTER TABLE knowledge_articles
+ALTER COLUMN module TYPE TEXT;
+
+COMMIT;

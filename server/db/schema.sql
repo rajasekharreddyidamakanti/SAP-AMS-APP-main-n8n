@@ -19,12 +19,12 @@ CREATE TABLE knowledge_articles (
     article_id SERIAL PRIMARY KEY,
     title VARCHAR(500) NOT NULL,
     content TEXT NOT NULL,
-    module VARCHAR(100),
+    module TEXT,
     severity VARCHAR(50)
         CHECK (severity IN ('critical', 'high', 'medium', 'low')),
     status VARCHAR(50)
         DEFAULT 'draft'
-        CHECK (status IN ('draft', 'under_review', 'published')),
+        CHECK (status IN ('draft', 'under_review', 'co_author_pending', 'published', 'rejected')),
     tags TEXT[],
     embedding JSONB,
     created_by INTEGER REFERENCES users(user_id),
@@ -352,6 +352,7 @@ SET status = CASE LOWER(TRIM(COALESCE(status, 'draft')))
     WHEN 'under_review' THEN 'under_review'
     WHEN 'under review' THEN 'under_review'
     WHEN 'pending' THEN 'under_review'
+    WHEN 'co_author_pending' THEN 'co_author_pending'
     WHEN 'rejected' THEN 'rejected'
     WHEN 'draft' THEN 'draft'
     ELSE 'draft'
@@ -359,7 +360,7 @@ END;
 
 ALTER TABLE knowledge_articles
 ADD CONSTRAINT knowledge_articles_status_check
-CHECK (status IN ('draft', 'under_review', 'published', 'rejected'));
+CHECK (status IN ('draft', 'under_review', 'co_author_pending', 'published', 'rejected'));
 
 ALTER TABLE knowledge_articles
 DROP CONSTRAINT IF EXISTS knowledge_articles_severity_check;

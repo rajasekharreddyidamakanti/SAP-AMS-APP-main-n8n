@@ -15,6 +15,7 @@ SET status = CASE LOWER(TRIM(COALESCE(status, 'draft')))
     WHEN 'under_review' THEN 'under_review'
     WHEN 'under review' THEN 'under_review'
     WHEN 'pending' THEN 'under_review'
+    WHEN 'co_author_pending' THEN 'co_author_pending'
     WHEN 'rejected' THEN 'rejected'
     WHEN 'draft' THEN 'draft'
     ELSE 'draft'
@@ -22,7 +23,7 @@ END;
 
 ALTER TABLE knowledge_articles
 ADD CONSTRAINT knowledge_articles_status_check
-CHECK (status IN ('draft', 'under_review', 'published', 'rejected'));
+CHECK (status IN ('draft', 'under_review', 'co_author_pending', 'published', 'rejected'));
 
 CREATE TABLE IF NOT EXISTS article_edit_history (
     history_id SERIAL PRIMARY KEY,
